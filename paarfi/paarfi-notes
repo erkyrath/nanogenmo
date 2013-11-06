@@ -1,0 +1,45 @@
+
+example [Q: "Is it safe?" A:"Yes."]
+
+(Q?) ["Do I understand you to be asking (whether Q)?" "Yes."] (A.)
+
+(Q?) ["You want to know (whether Q)?" "I have been asking nothing else for an hour."] (A.)
+
+(Q?) ["Shall I tell you now?" "Yes."] (A.)
+
+(Q?) ["Shall I tell you (whether Q)?" "Yes."] (A.)
+
+(Q?) "I find the question astonishing." ["Will you answer it?" "Yes."] "Then do so." (A.)
+
+(Q?) "I find the question astonishing." ["How, you find the question astonishing?" "I do."] "Please answer it." "I will." ["When?" "Directly."] "I await your answer." (A.)
+
+(Q?) "I believe I can answer." "Do so, then." "I will." "Begin." (A.)
+
+["May I ask a question?" "Yes."] (Q?) (A.)
+
+"May I ask a question?" "If you believe the answer will aid you." "I do." "You may ask, then." (Q?) (A.)
+
+"Q?" ["That is your question?" "Yes."] (A.)
+
+"Is it..." ["If I may interrupt." "No."] "Very well, continue." "...safe?"
+
+example [S: "I am eager to know."]
+
+(S.) ["Do you mean to tell me that (S)?" "Yes."]
+
+(S.) ["So you aver that (S)."] ["I do."]
+
+(S.) ["So you claim that (S)."] ["I do claim that (S)."]
+
+(S.) ["How, (S)?" "Yes."]
+
+(S.) ["How, (S)?" "You have understood me exactly."]
+
+"I have something to tell you." "Well, I am listening." (S.)
+
+(S.) "Excuse me, but you said that (S)." "So I did."
+
+...You perceive, you have only repeated my statement, turning it into the form of a question.
+
+"yes", "indeed", "precisely", "unquestionably", "to a certainty"
+"no", "indeed not", "never", "never in a million years"
