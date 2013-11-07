@@ -15,6 +15,10 @@ example [Q: "Is it safe?" A:"Yes."]
 
 (Q?) "I believe I can answer." "Do so, then." "I will." "Begin." (A.)
 
+"I have a question: (Q?)" (A.)
+
+(Q?) "Here is my answer: (A)."
+
 ["May I ask a question?" "Yes."] (Q?) (A.)
 
 "May I ask a question?" "If you believe the answer will aid you." "I do." "You may ask, then." (Q?) (A.)

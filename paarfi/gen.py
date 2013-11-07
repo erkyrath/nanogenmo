@@ -10,8 +10,9 @@ class Streamer:
     def close(self):
         outfl = sys.stdout.write
 
-    def writeline(self, func, asker=False):
+    def writeline(self, func, asker=False, height=None):
         outfl = sys.stdout.write
+        outfl('?:' if height is None else ('%d:' % (height,)))
         outfl('B: ' if asker else 'A: ')
         outfl('"')
         func(self)
@@ -98,17 +99,17 @@ class Question:
         self.generatea(strout)
 
     def generateq(self, strout):
-        strout.writeline(self.question, self.asker)
+        strout.writeline(self.question, self.asker, self.height)
 
     def generatea(self, strout):
-        strout.writeline(self.answer, self.answerer)
+        strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
         if self.height > 0:
             return self
-        #return IBelieveICanAnswerSeq(self)
+        return IBelieveICanAnswerSeq(self)
         #return ShallITellYouSeq(self)
-        return MayIAskSeq(self)
+        #return MayIAskSeq(self)
 
     
 class CoreSequence(Sequence):
@@ -153,11 +154,11 @@ class IBelieveICanAnswerSeq(Sequence):
 
     def generate(self, strout):
         self.query.generateq(strout)
-        strout.writeline(lambda strout:strout.write(['I believe I can answer that']), self.query.answerer)
-        strout.writeline(lambda strout:strout.write(['do so, then']), self.query.asker)
+        strout.writeline(lambda strout:strout.write(['I believe I can answer that']), self.query.answerer, self.height)
+        strout.writeline(lambda strout:strout.write(['do so, then']), self.query.asker, self.height)
         ### 50% of next pair?
-        strout.writeline(lambda strout:strout.write(['I will']), self.query.answerer)
-        strout.writeline(lambda strout:strout.write(['then begin']), self.query.asker)
+        strout.writeline(lambda strout:strout.write(['I will']), self.query.answerer, self.height)
+        strout.writeline(lambda strout:strout.write(['then begin']), self.query.asker, self.height)
         self.query.generatea(strout)
         
         
