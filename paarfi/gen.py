@@ -110,6 +110,8 @@ class Question:
         return IBelieveICanAnswerSeq(self)
         #return ShallITellYouSeq(self)
         #return MayIAskSeq(self)
+        #return IHaveAQuestion(self)
+        #return HereIsMyAnswer(self)
 
     
 class CoreSequence(Sequence):
@@ -127,7 +129,33 @@ class CoreQuestion(Question):
     def answer(self, strout):
         strout.write('yes')
 
-    
+        
+class IHaveAQuestion(Question):
+    def __init__(self, query):
+        Question.__init__(self, query.asker, query.height+1)
+        self.query = query
+
+    def question(self, strout):
+        strout.write('I have a question:')
+        self.query.question(strout)
+        
+    def answer(self, strout):
+        self.query.answer(strout)
+
+
+class HereIsMyAnswer(Question):
+    def __init__(self, query):
+        Question.__init__(self, query.asker, query.height+1)
+        self.query = query
+
+    def question(self, strout):
+        self.query.question(strout)
+        
+    def answer(self, strout):
+        strout.write('Here is my answer:')
+        self.query.answer(strout)
+
+
 class ShallITellYouSeq(Sequence):
     def __init__(self, query):
         Sequence.__init__(self, query.height+1)
