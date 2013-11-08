@@ -36,8 +36,8 @@ class Streamer:
                 outfl('."\n')
         self.curstate = 'BEGIN'
         self.curspeaker = None
-        if self.revstack or self.revflag:
-            outfl('ERROR: revstack still %s' % (self.revstack,))
+        assert (not self.revstack)
+        assert (not self.revflag)
 
     def write(self, val):
         outfl = sys.stdout.write
