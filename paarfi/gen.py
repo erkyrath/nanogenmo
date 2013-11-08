@@ -6,14 +6,23 @@ class Streamer:
     def __init__(self):
         outfl = sys.stdout.write
         self.curstate = 'BEGIN'
+        self.revflag = False
+        self.revstack = []
 
     def close(self):
         outfl = sys.stdout.write
 
+    def pushrev(self, flag):
+        self.revstack.append(self.revflag)
+        self.revflag = flag
+
+    def poprev(self):
+        self.revflag = self.revstack.pop()
+
     def writeline(self, func, asker=False, height=None):
         outfl = sys.stdout.write
-        outfl('?:' if height is None else ('%d:' % (height,)))
         outfl('B: ' if asker else 'A: ')
+        outfl('(?) ' if height is None else ('(%d) ' % (height,)))
         outfl('"')
         func(self)
         if (self.curstate != 'BEGIN'):
@@ -22,6 +31,8 @@ class Streamer:
             else:
                 outfl('."\n')
         self.curstate = 'BEGIN'
+        if self.revstack or self.revflag:
+            outfl('ERROR: revstack still %s' % (self.revstack,))
 
     def write(self, val):
         outfl = sys.stdout.write
@@ -76,6 +87,14 @@ class Streamer:
                     else:
                         self.curstate = 'JOIN'
                 else:
+                    if val == 'I':
+                        val = 'I' if not self.revflag else 'you'
+                    elif val == 'ME':
+                        val = 'me' if not self.revflag else 'you'
+                    elif val == 'YOU':
+                        val = 'you' if not self.revflag else 'I'
+                    elif val == 'OYOU':
+                        val = 'you' if not self.revflag else 'me'
                     if (docap):
                         outfl(val[0].upper())
                         outfl(val[1:])
@@ -105,10 +124,11 @@ class Question:
         strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
-        if self.height > 0:
+        if self.height > 2:
             return self
-        return IBelieveICanAnswerSeq(self)
-        #return ShallITellYouSeq(self)
+        #return IBelieveICanAnswerSeq(self)
+        #return ShallITellYouNowSeq(self)
+        return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestion(self)
         #return HereIsMyAnswer(self)
@@ -126,11 +146,15 @@ class CoreQuestion(Question):
     def question(self, strout):
         strout.write('is it safe')
         strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether it is safe')
+        
     def answer(self, strout):
         strout.write('yes')
 
         
-class IHaveAQuestion(Question):
+class IHaveAQuestion(Question): ### seq
     def __init__(self, query):
         Question.__init__(self, query.asker, query.height+1)
         self.query = query
@@ -143,7 +167,7 @@ class IHaveAQuestion(Question):
         self.query.answer(strout)
 
 
-class HereIsMyAnswer(Question):
+class HereIsMyAnswer(Question): ### seq
     def __init__(self, query):
         Question.__init__(self, query.asker, query.height+1)
         self.query = query
@@ -156,21 +180,59 @@ class HereIsMyAnswer(Question):
         self.query.answer(strout)
 
 
-class ShallITellYouSeq(Sequence):
+class ShallITellYouNowSeq(Sequence):
     def __init__(self, query):
         Sequence.__init__(self, query.height+1)
         self.query = query
-        self.subnode = ShallITellYouQ(not query.asker, self.height).elaborate()
+        self.subnode = ShallITellYouNowQ(not query.asker, self.height).elaborate()
 
     def generate(self, strout):
         self.query.generateq(strout)
         self.subnode.generate(strout)
         self.query.generatea(strout)
         
-class ShallITellYouQ(Question):
+class ShallITellYouNowQ(Question):
+    
     def question(self, strout):
-        strout.write('shall I tell you')
+        strout.write('shall I tell you now')
         strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether I shall tell you now')
+        
+    def answer(self, strout):
+        strout.write('please do')
+
+
+class ShallITellYouWhetherSeq(Sequence):
+    def __init__(self, query):
+        Sequence.__init__(self, query.height+1)
+        self.query = query
+        self.subnode = ShallITellYouWhetherQ(query, not query.asker).elaborate()
+
+    def generate(self, strout):
+        self.query.generateq(strout)
+        self.subnode.generate(strout)
+        self.query.generatea(strout)
+        
+class ShallITellYouWhetherQ(Question):
+    def __init__(self, query, asker):
+        Question.__init__(self, asker, query.height+1)
+        self.query = query
+
+    def question(self, strout):
+        strout.write(['shall', 'I', 'tell', 'OYOU'])
+        strout.pushrev(self.asker != self.query.asker)
+        self.query.qwhether(strout)
+        strout.poprev()
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write(['whether', 'I', 'shall tell', 'OYOU'])
+        strout.pushrev(self.asker != self.query.asker)
+        self.query.qwhether(strout)
+        strout.poprev()
+        
     def answer(self, strout):
         strout.write('please do')
 
@@ -202,9 +264,14 @@ class MayIAskSeq(Sequence):
         self.query.generatea(strout)
         
 class MayIAskQ(Question):
+    
     def question(self, strout):
         strout.write('may I ask a question')
         strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether I may ask a question')
+        
     def answer(self, strout):
         strout.write('yes')
 
