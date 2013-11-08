@@ -136,11 +136,11 @@ class Question:
         strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
-        if self.height > 2:
+        if self.height > 1:
             return self
         #return IBelieveICanAnswerSeq(self)
-        #return ShallITellYouNowSeq(self)
-        return ShallITellYouWhetherSeq(self)
+        return ShallITellYouNowSeq(self)
+        #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestion(self)
         #return HereIsMyAnswer(self)
@@ -161,6 +161,17 @@ class CoreQuestion(Question):
         
     def qwhether(self, strout):
         strout.write('whether it is safe')
+        
+    def answer(self, strout):
+        strout.write('yes')
+        
+class AltCoreQuestion(Question):
+    def question(self, strout):
+        strout.write(['be', 'I', 'safe'])
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write(['whether', 'I', 'be safe'])
         
     def answer(self, strout):
         strout.write('yes')
@@ -196,7 +207,7 @@ class ShallITellYouNowSeq(Sequence):
     def __init__(self, query):
         Sequence.__init__(self, query.height+1)
         self.query = query
-        self.subnode = ShallITellYouNowQ(not query.asker, self.height).elaborate()
+        self.subnode = ShallITellYouNowQ(query, not query.asker).elaborate()
 
     def generate(self, strout):
         self.query.generateq(strout)
@@ -204,16 +215,23 @@ class ShallITellYouNowSeq(Sequence):
         self.query.generatea(strout)
         
 class ShallITellYouNowQ(Question):
+    def __init__(self, query, asker):
+        Question.__init__(self, asker, query.height+1)
+        self.query = query
     
     def question(self, strout):
-        strout.write('shall I tell you now')
+        strout.write(['shall', 'I', 'tell', 'OYOU', 'now'])
         strout.write('STOPQ')
         
     def qwhether(self, strout):
-        strout.write('whether I shall tell you now')
+        strout.write(['whether', 'I', 'shall tell', 'OYOU', 'now'])
         
     def answer(self, strout):
-        strout.write('please do')
+        #strout.write('please do')
+        strout.write(['by all means tell', 'ME'])
+        strout.pushquery(self.query)
+        self.query.qwhether(strout)
+        strout.popquery()
 
 
 class ShallITellYouWhetherSeq(Sequence):
