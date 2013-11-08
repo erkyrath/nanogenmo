@@ -39,13 +39,8 @@ class Streamer:
         assert (not self.revstack)
         assert (not self.revflag)
 
-    def write(self, val):
+    def write(self, *ls):
         outfl = sys.stdout.write
-
-        if type(val) == list:
-            ls = val
-        else:
-            ls = [ val ]
 
         for val in ls:
             
@@ -139,8 +134,8 @@ class Question:
         if self.height > 1:
             return self
         #return IBelieveICanAnswerSeq(self)
-        return ShallITellYouNowSeq(self)
-        #return ShallITellYouWhetherSeq(self)
+        #return ShallITellYouNowSeq(self)
+        return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestion(self)
         #return HereIsMyAnswer(self)
@@ -167,11 +162,11 @@ class CoreQuestion(Question):
         
 class AltCoreQuestion(Question):
     def question(self, strout):
-        strout.write(['be', 'I', 'safe'])
+        strout.write('be', 'I', 'safe')
         strout.write('STOPQ')
         
     def qwhether(self, strout):
-        strout.write(['whether', 'I', 'be safe'])
+        strout.write('whether', 'I', 'be safe')
         
     def answer(self, strout):
         strout.write('yes')
@@ -220,15 +215,15 @@ class ShallITellYouNowQ(Question):
         self.query = query
     
     def question(self, strout):
-        strout.write(['shall', 'I', 'tell', 'OYOU', 'now'])
+        strout.write('shall', 'I', 'tell', 'OYOU', 'now')
         strout.write('STOPQ')
         
     def qwhether(self, strout):
-        strout.write(['whether', 'I', 'shall tell', 'OYOU', 'now'])
+        strout.write('whether', 'I', 'shall tell', 'OYOU', 'now')
         
     def answer(self, strout):
         #strout.write('please do')
-        strout.write(['by all means tell', 'ME'])
+        strout.write('by all means tell', 'ME')
         strout.pushquery(self.query)
         self.query.qwhether(strout)
         strout.popquery()
@@ -251,14 +246,14 @@ class ShallITellYouWhetherQ(Question):
         self.query = query
 
     def question(self, strout):
-        strout.write(['shall', 'I', 'tell', 'OYOU'])
+        strout.write('shall', 'I', 'tell', 'OYOU')
         strout.pushquery(self.query)
         self.query.qwhether(strout)
         strout.popquery()
         strout.write('STOPQ')
         
     def qwhether(self, strout):
-        strout.write(['whether', 'I', 'shall tell', 'OYOU'])
+        strout.write('whether', 'I', 'shall tell', 'OYOU')
         strout.pushquery(self.query)
         self.query.qwhether(strout)
         strout.popquery()
@@ -274,11 +269,11 @@ class IBelieveICanAnswerSeq(Sequence):
 
     def generate(self, strout):
         self.query.generateq(strout)
-        strout.writeline(lambda strout:strout.write(['I believe I can answer that']), self.query.answerer, self.height)
-        strout.writeline(lambda strout:strout.write(['do so, then']), self.query.asker, self.height)
+        strout.writeline(lambda strout:strout.write('I believe I can answer that'), self.query.answerer, self.height)
+        strout.writeline(lambda strout:strout.write('do so, then'), self.query.asker, self.height)
         ### 50% of next pair?
-        strout.writeline(lambda strout:strout.write(['I will']), self.query.answerer, self.height)
-        strout.writeline(lambda strout:strout.write(['then begin']), self.query.asker, self.height)
+        strout.writeline(lambda strout:strout.write('I will'), self.query.answerer, self.height)
+        strout.writeline(lambda strout:strout.write('then begin'), self.query.asker, self.height)
         self.query.generatea(strout)
         
         
