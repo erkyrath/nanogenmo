@@ -8,18 +8,22 @@ class Streamer:
         self.curstate = 'BEGIN'
         self.revflag = False
         self.revstack = []
+        self.curspeaker = None
 
     def close(self):
         outfl = sys.stdout.write
 
-    def pushrev(self, flag):
+    def pushquery(self, query):
+        assert (self.curspeaker is not None)
+        newflag = (self.curspeaker != query.asker)
         self.revstack.append(self.revflag)
-        self.revflag = flag
+        self.revflag = newflag
 
-    def poprev(self):
+    def popquery(self):
         self.revflag = self.revstack.pop()
 
     def writeline(self, func, asker=False, height=None):
+        self.curspeaker = asker
         outfl = sys.stdout.write
         outfl('B: ' if asker else 'A: ')
         outfl('(?) ' if height is None else ('(%d) ' % (height,)))
@@ -31,6 +35,7 @@ class Streamer:
             else:
                 outfl('."\n')
         self.curstate = 'BEGIN'
+        self.curspeaker = None
         if self.revstack or self.revflag:
             outfl('ERROR: revstack still %s' % (self.revstack,))
 
@@ -106,6 +111,9 @@ class Streamer:
 class Sequence:
     def __init__(self, height):
         self.height = height
+
+    def __repr__(self):
+        return '<%s hgt=%d>' % (self.__class__.__name__, self.height)
     
 class Question:
     def __init__(self, asker, height=0):
@@ -113,6 +121,10 @@ class Question:
         self.answerer = not bool(asker)
         self.height = height
 
+    def __repr__(self):
+        return '<%s hgt=%d asker=%s>' % (self.__class__.__name__, self.height,
+                                         'B' if self.asker else 'A')
+    
     def generate(self, strout):
         self.generateq(strout)
         self.generatea(strout)
@@ -222,16 +234,16 @@ class ShallITellYouWhetherQ(Question):
 
     def question(self, strout):
         strout.write(['shall', 'I', 'tell', 'OYOU'])
-        strout.pushrev(self.asker != self.query.asker)
+        strout.pushquery(self.query)
         self.query.qwhether(strout)
-        strout.poprev()
+        strout.popquery()
         strout.write('STOPQ')
         
     def qwhether(self, strout):
         strout.write(['whether', 'I', 'shall tell', 'OYOU'])
-        strout.pushrev(self.asker != self.query.asker)
+        strout.pushquery(self.query)
         self.query.qwhether(strout)
-        strout.poprev()
+        strout.popquery()
         
     def answer(self, strout):
         strout.write('please do')
