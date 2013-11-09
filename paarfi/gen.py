@@ -145,12 +145,13 @@ class Question:
         if self.height > 2:
             return self
         #return IBelieveICanAnswerSeq(self)
-        return ShallITellYouNowSeq(self)
+        #return ShallITellYouNowSeq(self)
         #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestionSeq(self)
         #return HereIsMyAnswerSeq(self)
         #return DoIUnderstandYouToBeAskingSeq(self)
+        return YouWantToKnowWhetherSeq(self)
 
     
 class CoreSequence(Sequence):
@@ -320,6 +321,45 @@ class DoIUnderstandYouToBeAskingQ(Question):
         
     def answer(self, strout):
         self.answeryes(strout)
+
+
+class YouWantToKnowWhetherSeq(Sequence):
+    def __init__(self, query):
+        Sequence.__init__(self, query.height+1)
+        self.query = query
+        self.subnode = YouWantToKnowWhetherQ(query, not query.asker).elaborate()
+
+    def generate(self, strout):
+        self.query.generateq(strout)
+        self.subnode.generate(strout)
+        self.query.generatea(strout)
+        
+class YouWantToKnowWhetherQ(Question):
+    def __init__(self, query, asker):
+        Question.__init__(self, asker, query.height+1)
+        self.query = query
+
+    def question(self, strout):
+        strout.write('YOU', 'want to know')
+        strout.pushquery(self.query)
+        self.query.qwhether(strout)
+        strout.popquery()
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether', 'YOU', 'want to know')
+        strout.pushquery(self.query)
+        self.query.qwhether(strout)
+        strout.popquery()
+        
+    def answer(self, strout):
+        val = random.choice([
+                ['I', 'have been asking nothing else for an hour'],
+                ['absolutely'],
+                ['I', 'am with child to know it'],
+                ['more than anything in the world']
+                ])
+        strout.write(*val)
 
 
 class IBelieveICanAnswerSeq(Sequence):
