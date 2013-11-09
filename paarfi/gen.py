@@ -221,7 +221,7 @@ class HereIsMyAnswerSeq(Sequence):
 
     def generate(self, strout):
         self.query.generateq(strout)
-        strout.writeline(self.answerplus, self.query.asker, self.height)
+        strout.writeline(self.answerplus, not self.query.asker, self.height)
 
     def answerplus(self, strout):
         strout.write('Here is my answer:')
