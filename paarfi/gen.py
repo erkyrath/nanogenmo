@@ -124,6 +124,8 @@ class Streamer:
                         val = 'you' if not self.revflag else 'I'
                     elif val == 'OYOU':
                         val = 'you' if not self.revflag else 'me'
+                    elif val == 'AREYOU':
+                        val = 'are you' if not self.revflag else 'am I'
                     elif val == 'YOUARE':
                         val = 'you are' if not self.revflag else 'I am'
                     elif val == 'IAM':
@@ -146,7 +148,7 @@ class Sequence:
 def godeeper(height):
     if height == 0:
         return True
-    if height <= 2:
+    if height <= 1:
         return (random.random() < 0.75)
     return (random.random() < 0.5)
     
@@ -209,6 +211,9 @@ class CoreSequence(Sequence):
         Sequence.__init__(self, 0)
         qseq = random.choice([
                 IsItSafeCoreQuestion, IsThereDangerCoreQuestion,
+                ShallWeProceedCoreQuestion,
+                ShallIGoFirstCoreQuestion, MayIGoFirstCoreQuestion,
+                AreYouAfraidCoreQuestion,
                 ])
         self.node = qseq(False, self.height).elaborate()
         
@@ -247,13 +252,41 @@ class IsItSafeCoreQuestion(YesBaseQuestion):
     def qwhether(self, strout):
         strout.write('whether it is safe')
         
+class ShallWeProceedCoreQuestion(YesBaseQuestion):
+    def question(self, strout):
+        strout.write('shall we proceed')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether we should proceed')
+        
 class IsThereDangerCoreQuestion(NoBaseQuestion):
     def question(self, strout):
         strout.write('is there danger')
         strout.write('STOPQ')
     def qwhether(self, strout):
         strout.write('whether there is danger')
-        
+
+class ShallIGoFirstCoreQuestion(NoBaseQuestion):
+    def question(self, strout):
+        strout.write('shall', 'I', 'go first')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether', 'I', 'shall go first')
+
+class MayIGoFirstCoreQuestion(YesBaseQuestion):
+    def question(self, strout):
+        strout.write('may', 'I', 'go first')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether', 'I', 'may go first')
+
+class AreYouAfraidCoreQuestion(NoBaseQuestion):
+    def question(self, strout):
+        strout.write('AREYOU', 'afraid')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether', 'YOUARE', 'afraid')
+
         
 class IHaveAQuestionSeq(Sequence):
     def __init__(self, query):
