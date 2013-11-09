@@ -139,6 +139,13 @@ class Sequence:
 
     def __repr__(self):
         return '<%s hgt=%d>' % (self.__class__.__name__, self.height)
+
+def godeeper(height):
+    if height == 0:
+        return True
+    if height <= 2:
+        return (random.random() < 0.75)
+    return (random.random() < 0.5)
     
 class Question:
     def __init__(self, asker, height=0):
@@ -161,7 +168,7 @@ class Question:
         strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
-        if self.height > 0:
+        if not godeeper(self.height):
             return self
         seq = random.choice([
                 IHaveAQuestionSeq, HereIsMyAnswerSeq,
@@ -185,7 +192,7 @@ class Statement:
         strout.writeline(self.statement, self.speaker, self.height)
 
     def elaborate(self):
-        if self.height > 1:
+        if not godeeper(self.height):
             return self
         seq = random.choice([
                 HowSeq, HowSeq,
