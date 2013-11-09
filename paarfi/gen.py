@@ -196,10 +196,10 @@ class Statement:
     def elaborate(self):
         if self.height > 1:
             return self
-        ####
-        #seq = HowSeq
-        #seq = SoYouClaimSeq
-        seq = IHaveSomethingToTellSeq
+        seq = random.choice([
+                HowSeq, HowSeq,
+                SoYouClaimSeq, IHaveSomethingToTellSeq, ExcuseMeButYouSaidSeq
+                ])
         return seq(self)
 
 
@@ -575,6 +575,23 @@ class IHaveSomethingToTellState(Statement):
         strout.write('I', 'have something to tell', 'OYOU')
             
 
+class ExcuseMeButYouSaidSeq(Sequence):
+    def __init__(self, stat):
+        Sequence.__init__(self, stat.height+1)
+        self.stat = stat
+
+    def generate(self, strout):
+        self.stat.generate(strout)
+        strout.writeline(self.repeatplus, not self.stat.speaker, self.height)
+        strout.writeline(lambda strout:strout.write('so', 'I', 'did'), self.stat.speaker, self.height)
+
+    def repeatplus(self, strout):
+        strout.write('excuse me, but', 'YOU', 'said that')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
+
+        
 streamer = Streamer()
 
 coreseq = CoreSequence()
