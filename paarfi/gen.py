@@ -144,14 +144,13 @@ class Question:
     def elaborate(self):
         if self.height > 2:
             return self
-        #return IBelieveICanAnswerSeq(self)
-        #return ShallITellYouNowSeq(self)
-        #return ShallITellYouWhetherSeq(self)
-        #return MayIAskSeq(self)
-        #return IHaveAQuestionSeq(self)
-        #return HereIsMyAnswerSeq(self)
-        #return DoIUnderstandYouToBeAskingSeq(self)
-        return YouWantToKnowWhetherSeq(self)
+        seq = random.choice([
+                IHaveAQuestionSeq, HereIsMyAnswerSeq,
+                ShallITellYouNowSeq, ShallITellYouWhetherSeq,
+                DoIUnderstandYouToBeAskingSeq, YouWantToKnowWhetherSeq,
+                IBelieveICanAnswerSeq, MayIAskSeq,
+                ])
+        return seq(self)
 
     
 class CoreSequence(Sequence):
