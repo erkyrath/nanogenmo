@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import random
 
 class Streamer:
     def __init__(self):
@@ -121,6 +122,13 @@ class Question:
     def __repr__(self):
         return '<%s hgt=%d asker=%s>' % (self.__class__.__name__, self.height,
                                          'B' if self.asker else 'A')
+
+    @staticmethod
+    def answeryes(strout):
+        val = random.choice(['yes', 'yes',
+                             'indeed', 'precisely',
+                             'unquestionably', 'to a certainty'])
+        strout.write(val)
     
     def generate(self, strout):
         self.generateq(strout)
@@ -161,7 +169,7 @@ class CoreQuestion(Question):
         strout.write('whether it is safe')
         
     def answer(self, strout):
-        strout.write('yes')
+        self.answeryes(strout)
         
 class AltCoreQuestion(Question):
     def question(self, strout):
@@ -172,7 +180,7 @@ class AltCoreQuestion(Question):
         strout.write('whether', 'I', 'be safe')
         
     def answer(self, strout):
-        strout.write('yes')
+        self.answeryes(strout)
 
         
 class IHaveAQuestionSeq(Sequence):
@@ -297,7 +305,7 @@ class DoIUnderstandYouToBeAskingQ(Question):
         strout.popquery()
         
     def answer(self, strout):
-        strout.write('yes')
+        self.answeryes(strout)
 
 
 class IBelieveICanAnswerSeq(Sequence):
@@ -336,7 +344,7 @@ class MayIAskQ(Question):
         strout.write('whether I may ask a question')
         
     def answer(self, strout):
-        strout.write('yes')
+        self.answeryes(strout)
 
 
 streamer = Streamer()
