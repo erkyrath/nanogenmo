@@ -194,7 +194,9 @@ class Statement:
     def elaborate(self):
         if self.height > 1:
             return self
-        seq = HowSeq
+        ####
+        #seq = HowSeq
+        seq = SoYouClaimSeq
         return seq(self)
 
 
@@ -510,6 +512,47 @@ class HowQ(Question):
             strout.pushstatement(self.stat)
             self.stat.statement(strout)
             strout.popstatement()
+
+            
+class SoYouClaimSeq(Sequence):
+    def __init__(self, stat):
+        Sequence.__init__(self, stat.height+1)
+        self.stat = stat
+        self.subnode = SoYouClaimQ(stat).elaborate()
+
+    def generate(self, strout):
+        self.stat.generate(strout)
+        self.subnode.generate(strout)
+
+class SoYouClaimQ(Question):
+    def __init__(self, stat):
+        Question.__init__(self, not stat.speaker, stat.height+1)
+        self.stat = stat
+
+    def question(self, strout):
+        strout.write('so you claim that')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
+        
+    def answer(self, strout):
+        flag = random.randrange(2)
+        if flag == 0:
+            Question.answeryes(strout)
+        else:
+            strout.write('I', 'do claim that')
+            strout.pushstatement(self.stat)
+            self.stat.statement(strout)
+            strout.popstatement()
+
+            
             
 
 streamer = Streamer()
