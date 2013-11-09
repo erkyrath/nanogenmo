@@ -37,6 +37,8 @@ example [S: "I am eager to know."]
 
 (S.) ["How, (S)?" "Yes."]
 
+(S.) ["How, (S)?" (S.)]
+
 (S.) ["How, (S)?" "You have understood me exactly."]
 
 "I have something to tell you." "Well, I am listening." (S.)

@@ -35,7 +35,16 @@ class Streamer:
         self.revstack.append(self.revflag)
         self.revflag = newflag
 
+    def pushstatement(self, stat):
+        assert (self.curspeaker is not None)
+        newflag = (self.curspeaker != stat.speaker)
+        self.revstack.append(self.revflag)
+        self.revflag = newflag
+
     def popquery(self):
+        self.revflag = self.revstack.pop()
+
+    def popstatement(self):
         self.revflag = self.revstack.pop()
 
     def writeline(self, func, asker=False, height=None):
@@ -158,7 +167,7 @@ class Question:
         strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
-        if self.height > 2:
+        if self.height > 0:
             return self
         seq = random.choice([
                 IHaveAQuestionSeq, HereIsMyAnswerSeq,
@@ -166,9 +175,29 @@ class Question:
                 DoIUnderstandYouToBeAskingSeq, YouWantToKnowWhetherSeq,
                 IBelieveICanAnswerSeq, MayIAskSeq,
                 ])
+        seq = IBelieveICanAnswerSeq ####
         return seq(self)
 
-    
+
+class Statement:
+    def __init__(self, speaker, height=0):
+        self.speaker = bool(speaker)
+        self.height = height
+
+    def __repr__(self):
+        return '<%s hgt=%d speaker=%s>' % (self.__class__.__name__, self.height,
+                                         'B' if self.speaker else 'A')
+
+    def generate(self, strout):
+        strout.writeline(self.statement, self.speaker, self.height)
+
+    def elaborate(self):
+        if self.height > 1:
+            return self
+        seq = HowSeq
+        return seq(self)
+
+
 class CoreSequence(Sequence):
     def __init__(self):
         Sequence.__init__(self, 0)
@@ -381,17 +410,37 @@ class IBelieveICanAnswerSeq(Sequence):
     def __init__(self, query):
         Sequence.__init__(self, query.height+1)
         self.query = query
+        self.subnode = IBelieveICanAnswerState(query, self.height).elaborate()
+        self.subnode2 = None
+        flag = (random.random() < 0.5)
+        if flag:
+            self.subnode2 = IWillState(query, self.height).elaborate()
 
     def generate(self, strout):
         self.query.generateq(strout)
-        strout.writeline(lambda strout:strout.write('I believe I can answer that'), self.query.answerer, self.height)
+        self.subnode.generate(strout)
         strout.writeline(lambda strout:strout.write('do so, then'), self.query.asker, self.height)
-        flag = (random.random() < 0.5)
-        if flag:
-            strout.writeline(lambda strout:strout.write('I will'), self.query.answerer, self.height)
+        if self.subnode2:
+            self.subnode2.generate(strout)
             strout.writeline(lambda strout:strout.write('then begin'), self.query.asker, self.height)
         self.query.generatea(strout)
+
+class IBelieveICanAnswerState(Statement):
+    def __init__(self, query, height):
+        Statement.__init__(self, not query.asker, height)
+        self.query = query
+
+    def statement(self, strout):
+        strout.write('I', 'believe', 'I', 'can answer that')
         
+class IWillState(Statement):
+    def __init__(self, query, height):
+        Statement.__init__(self, not query.asker, height)
+        self.query = query
+
+    def statement(self, strout):
+        strout.write('I', 'will')
+    
         
 class MayIAskSeq(Sequence):
     def __init__(self, query):
@@ -420,6 +469,48 @@ class MayIAskQ(Question):
                              'ask'])
         strout.write(val)
 
+
+class HowSeq(Sequence):
+    def __init__(self, stat):
+        Sequence.__init__(self, stat.height+1)
+        self.stat = stat
+        self.subnode = HowQ(stat).elaborate()
+
+    def generate(self, strout):
+        self.stat.generate(strout)
+        self.subnode.generate(strout)
+
+class HowQ(Question):
+    def __init__(self, stat):
+        Question.__init__(self, not stat.speaker, stat.height+1)
+        self.stat = stat
+
+    def question(self, strout):
+        strout.write('how,')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
+        
+    def answer(self, strout):
+        flag = random.randrange(3)
+        if flag == 0:
+            Question.answeryes(strout)
+        elif flag == 1:
+            strout.write('YOU', 'have understood', 'ME', 'exactly')
+        else:
+            val = random.choice(['yes', 'indeed', 'just so'])
+            strout.write(val, 'COMMA')
+            strout.pushstatement(self.stat)
+            self.stat.statement(strout)
+            strout.popstatement()
+            
 
 streamer = Streamer()
 
