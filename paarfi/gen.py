@@ -169,7 +169,6 @@ class Question:
                 DoIUnderstandYouToBeAskingSeq, YouWantToKnowWhetherSeq,
                 IBelieveICanAnswerSeq, MayIAskSeq,
                 ])
-        seq = DoIUnderstandYouToBeAskingSeq ####
         return seq(self)
 
 
@@ -192,7 +191,6 @@ class Statement:
                 HowSeq, HowSeq,
                 SoYouClaimSeq, IHaveSomethingToTellSeq, ExcuseMeButYouSaidSeq
                 ])
-        seq = HowSeq ####
         return seq(self)
 
 
@@ -218,6 +216,11 @@ class CoreQuestion(Question):
         
     def generatea(self, strout):
         self.yesnode.generate(strout)
+
+    def answer(self, strout):
+        val = YesStatement.answeryes()
+        strout.write(val)
+        
         
 class AltCoreQuestion(Question):
     def __init__(self, asker, height=0):
@@ -416,11 +419,15 @@ class YouWantToKnowWhetherQ(Question):
 class YesStatement(Statement):
     def __init__(self, speaker, height):
         Statement.__init__(self, speaker, height)
+        self.response = self.answeryes()
+
+    @staticmethod
+    def answeryes():
         val = random.choice(['yes', 'yes',
                              'indeed', 'precisely',
                              'unquestionably', 'to a certainty',
                              'never doubt it'])
-        self.response = val
+        return val
 
     def statement(self, strout):
         strout.write(self.response)
@@ -593,7 +600,7 @@ class IHaveSomethingToTellSeq(Sequence):
 
     def generate(self, strout):
         self.subnode.generate(strout)
-        strout.writeline(lambda strout:strout.write('well', 'COMMA', 'IAM', 'listening'), self.stat.speaker, self.height)
+        strout.writeline(lambda strout:strout.write('well', 'COMMA', 'IAM', 'listening'), not self.stat.speaker, self.height)
         self.stat.generate(strout)
 
 class IHaveSomethingToTellState(Statement):
