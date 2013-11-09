@@ -144,8 +144,8 @@ class Question:
     def elaborate(self):
         if self.height > 2:
             return self
-        return IBelieveICanAnswerSeq(self)
-        #return ShallITellYouNowSeq(self)
+        #return IBelieveICanAnswerSeq(self)
+        return ShallITellYouNowSeq(self)
         #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestionSeq(self)
@@ -236,11 +236,19 @@ class ShallITellYouNowQ(Question):
         strout.write('whether', 'I', 'shall tell', 'OYOU', 'now')
         
     def answer(self, strout):
-        #strout.write('please do')
-        strout.write('by all means tell', 'ME')
-        strout.pushquery(self.query)
-        self.query.qwhether(strout)
-        strout.popquery()
+        flag = (random.random() < 0.5)
+        if flag:
+            val = random.choice([
+                    ['please do'],
+                    ['by all means'],
+                    ['I', 'hope for nothing less'],
+                    ])
+            strout.write(*val)
+        else:
+            strout.write('by all means tell', 'ME')
+            strout.pushquery(self.query)
+            self.query.qwhether(strout)
+            strout.popquery()
 
 
 class ShallITellYouWhetherSeq(Sequence):
@@ -273,7 +281,12 @@ class ShallITellYouWhetherQ(Question):
         strout.popquery()
         
     def answer(self, strout):
-        strout.write('please do')
+        val = random.choice([
+                ['please do'],
+                ['by all means'],
+                ['I', 'hope for nothing less'],
+                ])
+        strout.write(*val)
 
 
 class DoIUnderstandYouToBeAskingSeq(Sequence):
