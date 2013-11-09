@@ -1,7 +1,22 @@
 #!/usr/bin/env python
 
+# The Paarfi-o-matic script.
+# Constructed for NaNoGenMo 2013 by Andrew Plotkin.
+# This script is in the public domain, for all the good that will do you.
+# Uncommented and obtuse.
+
 import sys
 import random
+import optparse
+
+parser = optparse.OptionParser()
+
+parser.add_option('-a', '--annotate',
+                  action='store_true', dest='annotate',
+                  help='Annotate each line with the speaker and depth')
+
+(opts, args) = parser.parse_args()
+
 
 class Streamer:
     def __init__(self):
@@ -26,8 +41,9 @@ class Streamer:
     def writeline(self, func, asker=False, height=None):
         self.curspeaker = asker
         outfl = sys.stdout.write
-        outfl('B: ' if asker else 'A: ')
-        outfl('(?) ' if height is None else ('(%d) ' % (height,)))
+        if opts.annotate:
+            outfl('B: ' if asker else 'A: ')
+            outfl('(?) ' if height is None else ('(%d) ' % (height,)))
         outfl('"')
         func(self)
         if (self.curstate != 'BEGIN'):
@@ -398,7 +414,11 @@ class MayIAskQ(Question):
         strout.write('whether I may ask a question')
         
     def answer(self, strout):
-        self.answeryes(strout)
+        val = random.choice(['yes', 'do so', 'go ahead',
+                             'indeed', 'proceed',
+                             'unquestionably', 'certainly',
+                             'ask'])
+        strout.write(val)
 
 
 streamer = Streamer()
