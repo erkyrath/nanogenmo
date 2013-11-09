@@ -14,6 +14,9 @@ parser = optparse.OptionParser()
 parser.add_option('-a', '--annotate',
                   action='store_true', dest='annotate',
                   help='Annotate each line with the speaker and depth')
+parser.add_option('-n', '--count',
+                  type=int, dest='count', default=1,
+                  help='Number of question cycles to generate')
 
 (opts, args) = parser.parse_args()
 
@@ -664,7 +667,8 @@ class ExcuseMeButYouSaidSeq(Sequence):
         
 streamer = Streamer()
 
-coreseq = CoreSequence()
-coreseq.generate(streamer)
+for ix in range(opts.count):
+    coreseq = CoreSequence()
+    coreseq.generate(streamer)
 
 streamer.close()
