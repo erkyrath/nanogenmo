@@ -200,7 +200,7 @@ class Statement:
                 HowSeq, HowSeq,
                 SoYouClaimSeq, IHaveSomethingToTellSeq, ExcuseMeButYouSaidSeq
                 ])
-        seq = HowSeq ####
+        seq = SoYouClaimSeq ####
         return seq(self)
 
 
@@ -554,9 +554,12 @@ class SoYouClaimQ(Question):
     def __init__(self, stat):
         Question.__init__(self, not stat.speaker, stat.height+1)
         self.stat = stat
+        self.yesnode = None
+        if random.random() < 0.5:
+            self.yesnode = YesStatement(not self.asker, self.height).elaborate()
 
     def question(self, strout):
-        strout.write('so you claim that')
+        strout.write('so you say', 'COMMA')
         strout.pushstatement(self.stat)
         self.stat.statement(strout)
         strout.popstatement()
@@ -568,15 +571,17 @@ class SoYouClaimQ(Question):
         self.stat.statement(strout)
         strout.popstatement()
         
-    def answer(self, strout):
-        flag = random.randrange(2)
-        if flag == 0:
-            Question.answeryes(strout)
+    def generatea(self, strout):
+        if self.yesnode:
+            self.yesnode.generate(strout)
         else:
-            strout.write('I', 'do claim that')
-            strout.pushstatement(self.stat)
-            self.stat.statement(strout)
-            strout.popstatement()
+            strout.writeline(self.answer, self.answerer, self.height)
+
+    def answer(self, strout):
+        strout.write('I', 'do say', 'COMMA')
+        strout.pushstatement(self.stat)
+        self.stat.statement(strout)
+        strout.popstatement()
 
             
 class IHaveSomethingToTellSeq(Sequence):
