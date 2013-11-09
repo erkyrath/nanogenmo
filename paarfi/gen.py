@@ -131,14 +131,14 @@ class Question:
         strout.writeline(self.answer, self.answerer, self.height)
 
     def elaborate(self):
-        if self.height > 1:
+        if self.height > 2:
             return self
         #return IBelieveICanAnswerSeq(self)
         #return ShallITellYouNowSeq(self)
-        return ShallITellYouWhetherSeq(self)
+        #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
-        #return IHaveAQuestion(self)
-        #return HereIsMyAnswer(self)
+        return IHaveAQuestionSeq(self)
+        #return HereIsMyAnswerSeq(self)
 
     
 class CoreSequence(Sequence):
@@ -172,28 +172,30 @@ class AltCoreQuestion(Question):
         strout.write('yes')
 
         
-class IHaveAQuestion(Question): ### seq
+class IHaveAQuestionSeq(Sequence):
     def __init__(self, query):
-        Question.__init__(self, query.asker, query.height+1)
+        Sequence.__init__(self, query.height+1)
         self.query = query
 
-    def question(self, strout):
+    def generate(self, strout):
+        strout.writeline(self.questionplus, self.query.asker, self.height)
+        self.query.generatea(strout)
+
+    def questionplus(self, strout):
         strout.write('I have a question:')
         self.query.question(strout)
-        
-    def answer(self, strout):
-        self.query.answer(strout)
 
 
-class HereIsMyAnswer(Question): ### seq
+class HereIsMyAnswerSeq(Sequence):
     def __init__(self, query):
-        Question.__init__(self, query.asker, query.height+1)
+        Sequence.__init__(self, query.height+1)
         self.query = query
 
-    def question(self, strout):
-        self.query.question(strout)
-        
-    def answer(self, strout):
+    def generate(self, strout):
+        self.query.generateq(strout)
+        strout.writeline(self.answerplus, self.query.asker, self.height)
+
+    def answerplus(self, strout):
         strout.write('Here is my answer:')
         self.query.answer(strout)
 
