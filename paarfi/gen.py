@@ -150,14 +150,6 @@ class Question:
         return '<%s hgt=%d asker=%s>' % (self.__class__.__name__, self.height,
                                          'B' if self.asker else 'A')
 
-    @staticmethod
-    def answeryes(strout):
-        val = random.choice(['yes', 'yes',
-                             'indeed', 'precisely',
-                             'unquestionably', 'to a certainty',
-                             'never doubt it'])
-        strout.write(val)
-    
     def generate(self, strout):
         self.generateq(strout)
         self.generatea(strout)
@@ -200,7 +192,7 @@ class Statement:
                 HowSeq, HowSeq,
                 SoYouClaimSeq, IHaveSomethingToTellSeq, ExcuseMeButYouSaidSeq
                 ])
-        seq = SoYouClaimSeq ####
+        seq = HowSeq ####
         return seq(self)
 
 
@@ -512,6 +504,12 @@ class HowQ(Question):
     def __init__(self, stat):
         Question.__init__(self, not stat.speaker, stat.height+1)
         self.stat = stat
+        self.yesnode = None
+        flag = random.randrange(3)
+        if flag == 0:
+            self.yesnode = YesStatement(not self.asker, self.height).elaborate()
+        elif flag == 1:
+            self.yesnode = True
 
     def question(self, strout):
         strout.write('how,')
@@ -526,11 +524,14 @@ class HowQ(Question):
         self.stat.statement(strout)
         strout.popstatement()
         
+    def generatea(self, strout):
+        if isinstance(self.yesnode, YesStatement):
+            self.yesnode.generate(strout)
+        else:
+            strout.writeline(self.answer, self.answerer, self.height)
+        
     def answer(self, strout):
-        flag = random.randrange(3)
-        if flag == 0:
-            Question.answeryes(strout)
-        elif flag == 1:
+        if self.yesnode == True:
             strout.write('YOU', 'have understood', 'ME', 'exactly')
         else:
             val = random.choice(['yes', 'indeed', 'just so'])
