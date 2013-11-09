@@ -127,7 +127,8 @@ class Question:
     def answeryes(strout):
         val = random.choice(['yes', 'yes',
                              'indeed', 'precisely',
-                             'unquestionably', 'to a certainty'])
+                             'unquestionably', 'to a certainty',
+                             'never doubt it'])
         strout.write(val)
     
     def generate(self, strout):
@@ -143,13 +144,13 @@ class Question:
     def elaborate(self):
         if self.height > 2:
             return self
-        #return IBelieveICanAnswerSeq(self)
+        return IBelieveICanAnswerSeq(self)
         #return ShallITellYouNowSeq(self)
         #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
         #return IHaveAQuestionSeq(self)
         #return HereIsMyAnswerSeq(self)
-        return DoIUnderstandYouToBeAskingSeq(self)
+        #return DoIUnderstandYouToBeAskingSeq(self)
 
     
 class CoreSequence(Sequence):
@@ -317,9 +318,10 @@ class IBelieveICanAnswerSeq(Sequence):
         self.query.generateq(strout)
         strout.writeline(lambda strout:strout.write('I believe I can answer that'), self.query.answerer, self.height)
         strout.writeline(lambda strout:strout.write('do so, then'), self.query.asker, self.height)
-        ### 50% of next pair?
-        strout.writeline(lambda strout:strout.write('I will'), self.query.answerer, self.height)
-        strout.writeline(lambda strout:strout.write('then begin'), self.query.asker, self.height)
+        flag = (random.random() < 0.5)
+        if flag:
+            strout.writeline(lambda strout:strout.write('I will'), self.query.answerer, self.height)
+            strout.writeline(lambda strout:strout.write('then begin'), self.query.asker, self.height)
         self.query.generatea(strout)
         
         
