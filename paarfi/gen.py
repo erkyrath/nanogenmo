@@ -95,6 +95,8 @@ class Streamer:
                         val = 'you' if not self.revflag else 'I'
                     elif val == 'OYOU':
                         val = 'you' if not self.revflag else 'me'
+                    elif val == 'YOUARE':
+                        val = 'you are' if not self.revflag else 'I am'
                     if (docap):
                         outfl(val[0].upper())
                         outfl(val[1:])
@@ -137,8 +139,9 @@ class Question:
         #return ShallITellYouNowSeq(self)
         #return ShallITellYouWhetherSeq(self)
         #return MayIAskSeq(self)
-        return IHaveAQuestionSeq(self)
+        #return IHaveAQuestionSeq(self)
         #return HereIsMyAnswerSeq(self)
+        return DoIUnderstandYouToBeAskingSeq(self)
 
     
 class CoreSequence(Sequence):
@@ -262,6 +265,39 @@ class ShallITellYouWhetherQ(Question):
         
     def answer(self, strout):
         strout.write('please do')
+
+
+class DoIUnderstandYouToBeAskingSeq(Sequence):
+    def __init__(self, query):
+        Sequence.__init__(self, query.height+1)
+        self.query = query
+        self.subnode = DoIUnderstandYouToBeAskingQ(query, not query.asker).elaborate()
+
+    def generate(self, strout):
+        self.query.generateq(strout)
+        self.subnode.generate(strout)
+        self.query.generatea(strout)
+        
+class DoIUnderstandYouToBeAskingQ(Question):
+    def __init__(self, query, asker):
+        Question.__init__(self, asker, query.height+1)
+        self.query = query
+
+    def question(self, strout):
+        strout.write('do', 'I', 'understand', 'OYOU', 'to be asking')
+        strout.pushquery(self.query)
+        self.query.qwhether(strout)
+        strout.popquery()
+        strout.write('STOPQ')
+        
+    def qwhether(self, strout):
+        strout.write('whether', 'YOUARE', 'asking')
+        strout.pushquery(self.query)
+        self.query.qwhether(strout)
+        strout.popquery()
+        
+    def answer(self, strout):
+        strout.write('yes')
 
 
 class IBelieveICanAnswerSeq(Sequence):
