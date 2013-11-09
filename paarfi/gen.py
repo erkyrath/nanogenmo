@@ -177,7 +177,7 @@ class Question:
                 DoIUnderstandYouToBeAskingSeq, YouWantToKnowWhetherSeq,
                 IBelieveICanAnswerSeq, MayIAskSeq,
                 ])
-        seq = IBelieveICanAnswerSeq ####
+        seq = DoIUnderstandYouToBeAskingSeq ####
         return seq(self)
 
 
@@ -200,6 +200,7 @@ class Statement:
                 HowSeq, HowSeq,
                 SoYouClaimSeq, IHaveSomethingToTellSeq, ExcuseMeButYouSaidSeq
                 ])
+        seq = HowSeq ####
         return seq(self)
 
 
@@ -212,6 +213,10 @@ class CoreSequence(Sequence):
         self.node.generate(strout)
         
 class CoreQuestion(Question):
+    def __init__(self, asker, height=0):
+        Question.__init__(self, asker, height)
+        self.yesnode = YesStatement(not asker, self.height).elaborate()
+        
     def question(self, strout):
         strout.write('is it safe')
         strout.write('STOPQ')
@@ -219,10 +224,14 @@ class CoreQuestion(Question):
     def qwhether(self, strout):
         strout.write('whether it is safe')
         
-    def answer(self, strout):
-        self.answeryes(strout)
+    def generatea(self, strout):
+        self.yesnode.generate(strout)
         
 class AltCoreQuestion(Question):
+    def __init__(self, asker, height=0):
+        Question.__init__(self, asker, height)
+        self.yesnode = YesStatement(not asker, self.height).elaborate()
+        
     def question(self, strout):
         strout.write('be', 'I', 'safe')
         strout.write('STOPQ')
@@ -230,8 +239,8 @@ class AltCoreQuestion(Question):
     def qwhether(self, strout):
         strout.write('whether', 'I', 'be safe')
         
-    def answer(self, strout):
-        self.answeryes(strout)
+    def generatea(self, strout):
+        self.yesnode.generate(strout)
 
         
 class IHaveAQuestionSeq(Sequence):
@@ -354,6 +363,7 @@ class DoIUnderstandYouToBeAskingQ(Question):
     def __init__(self, query, asker):
         Question.__init__(self, asker, query.height+1)
         self.query = query
+        self.yesnode = YesStatement(not asker, self.height).elaborate()
 
     def question(self, strout):
         strout.write('do', 'I', 'understand', 'OYOU', 'to be asking')
@@ -368,8 +378,8 @@ class DoIUnderstandYouToBeAskingQ(Question):
         self.query.qwhether(strout)
         strout.popquery()
         
-    def answer(self, strout):
-        self.answeryes(strout)
+    def generatea(self, strout):
+        self.yesnode.generate(strout)
 
 
 class YouWantToKnowWhetherSeq(Sequence):
@@ -410,6 +420,19 @@ class YouWantToKnowWhetherQ(Question):
                 ])
         strout.write(*val)
 
+
+class YesStatement(Statement):
+    def __init__(self, speaker, height):
+        Statement.__init__(self, speaker, height)
+        val = random.choice(['yes', 'yes',
+                             'indeed', 'precisely',
+                             'unquestionably', 'to a certainty',
+                             'never doubt it'])
+        self.response = val
+
+    def statement(self, strout):
+        strout.write(self.response)
+        
 
 class IBelieveICanAnswerSeq(Sequence):
     def __init__(self, query):
