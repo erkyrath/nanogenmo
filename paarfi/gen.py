@@ -123,6 +123,8 @@ class Streamer:
                         val = 'you' if not self.revflag else 'me'
                     elif val == 'YOUARE':
                         val = 'you are' if not self.revflag else 'I am'
+                    elif val == 'IAM':
+                        val = 'I am' if not self.revflag else 'you are'
                     if (docap):
                         outfl(val[0].upper())
                         outfl(val[1:])
@@ -196,7 +198,8 @@ class Statement:
             return self
         ####
         #seq = HowSeq
-        seq = SoYouClaimSeq
+        #seq = SoYouClaimSeq
+        seq = IHaveSomethingToTellSeq
         return seq(self)
 
 
@@ -553,6 +556,23 @@ class SoYouClaimQ(Question):
             strout.popstatement()
 
             
+class IHaveSomethingToTellSeq(Sequence):
+    def __init__(self, stat):
+        Sequence.__init__(self, stat.height+1)
+        self.stat = stat
+        self.subnode = IHaveSomethingToTellState(stat).elaborate()
+
+    def generate(self, strout):
+        self.subnode.generate(strout)
+        strout.writeline(lambda strout:strout.write('well', 'COMMA', 'IAM', 'listening'), self.stat.speaker, self.height)
+        self.stat.generate(strout)
+
+class IHaveSomethingToTellState(Statement):
+    def __init__(self, stat):
+        Statement.__init__(self, stat.speaker, stat.height+1)
+
+    def statement(self, strout):
+        strout.write('I', 'have something to tell', 'OYOU')
             
 
 streamer = Streamer()
