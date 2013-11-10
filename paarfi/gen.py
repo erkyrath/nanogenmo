@@ -124,6 +124,8 @@ class Streamer:
                         val = 'you' if not self.revflag else 'I'
                     elif val == 'OYOU':
                         val = 'you' if not self.revflag else 'me'
+                    elif val == 'YOUR':
+                        val = 'your' if not self.revflag else 'my'
                     elif val == 'AREYOU':
                         val = 'are you' if not self.revflag else 'am I'
                     elif val == 'YOUARE':
@@ -215,6 +217,8 @@ class CoreSequence(Sequence):
                 ShallIGoFirstCoreQuestion, MayIGoFirstCoreQuestion,
                 AreYouAfraidCoreQuestion, AreYouTiredCoreQuestion,
                 AreWeThereYetCoreQuestion,
+                WhereAreWeGoingCoreQuestion, WhenShallWeBeThereCoreQuestion,
+                WhatIsYourNameCoreQuestion,
                 ])
         self.node = qseq(False, self.height).elaborate()
         
@@ -302,6 +306,32 @@ class AreWeThereYetCoreQuestion(NoBaseQuestion):
     def qwhether(self, strout):
         strout.write('whether we are there')
 
+class WhereAreWeGoingCoreQuestion(Question):
+    def question(self, strout):
+        strout.write('where are we going')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('where we are going')
+    def answer(self, strout):
+        strout.write('onward')
+
+class WhenShallWeBeThereCoreQuestion(Question):
+    def question(self, strout):
+        strout.write('when shall we be there')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('when we shall be there')
+    def answer(self, strout):
+        strout.write('soon enough')
+
+class WhatIsYourNameCoreQuestion(Question):
+    def question(self, strout):
+        strout.write('what is', 'YOUR', 'name')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('what', 'YOUR', 'name is')
+    def answer(self, strout):
+        strout.write('I', 'have not the least idea in the world')
 
         
 class IHaveAQuestionSeq(Sequence):
