@@ -23,7 +23,10 @@ example [Q: "Is it safe?" A:"Yes."]
 
 "May I ask a question?" "If you believe the answer will aid you." "I do." "You may ask, then." (Q?) (A.)
 
-"Q?" ["That is your question?" "Yes."] (A.)
+(Q?) ["That is your question?" "Yes."] (A.)
+
+(Q?) ["Does that matter?" "Perhaps."] (A.)
+
 
 "Is it..." ["If I may interrupt." "No."] "Very well, continue." "...safe?"
 
@@ -59,3 +62,8 @@ Are you afraid? No.
 Shall I go first? No.
 May I go first? Yes.
 Is there danger? No.
+Where are we going? Onward.
+Are we there yet? No.
+When shall we be there? Soon enough.
+Are you tired? No.
+What is your name? I have not the least idea in the world.

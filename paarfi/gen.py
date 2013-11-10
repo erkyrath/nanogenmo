@@ -213,7 +213,8 @@ class CoreSequence(Sequence):
                 IsItSafeCoreQuestion, IsThereDangerCoreQuestion,
                 ShallWeProceedCoreQuestion,
                 ShallIGoFirstCoreQuestion, MayIGoFirstCoreQuestion,
-                AreYouAfraidCoreQuestion,
+                AreYouAfraidCoreQuestion, AreYouTiredCoreQuestion,
+                AreWeThereYetCoreQuestion,
                 ])
         self.node = qseq(False, self.height).elaborate()
         
@@ -286,6 +287,21 @@ class AreYouAfraidCoreQuestion(NoBaseQuestion):
         strout.write('STOPQ')
     def qwhether(self, strout):
         strout.write('whether', 'YOUARE', 'afraid')
+
+class AreYouTiredCoreQuestion(NoBaseQuestion):
+    def question(self, strout):
+        strout.write('AREYOU', 'tired')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether', 'YOUARE', 'tired')
+
+class AreWeThereYetCoreQuestion(NoBaseQuestion):
+    def question(self, strout):
+        strout.write('are we there yet')
+        strout.write('STOPQ')
+    def qwhether(self, strout):
+        strout.write('whether we are there')
+
 
         
 class IHaveAQuestionSeq(Sequence):
