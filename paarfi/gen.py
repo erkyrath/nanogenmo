@@ -3,7 +3,55 @@
 # The Paarfi-o-matic script.
 # Constructed for NaNoGenMo 2013 by Andrew Plotkin.
 # This script is in the public domain, for all the good that will do you.
-# Uncommented and obtuse.
+
+"""
+This code is not commented, but I will try to explain the model. It's
+simpler than it looks, really.
+
+The idea is to take a simple question-answer pair ("Is it safe?" "Yes.")
+and elaborate it into a complicated interchange.
+
+This is done through a series of substitutions. We have a set of templates
+which can be substituted for an arbitrary Q-A pair. For example:
+
+"Q?" "A." => "I have a question: Q?" "A."
+"Q?" "A." => "Q?" "I believe I can answer." "Do so, then." "A."
+"Q?" "A." => "Q?" "Shall I tell you now?" "Yes." "A."
+
+In some cases, the template itself contains a question-answer pair.
+(See the third example above.) This pair is subject to further
+substitutions.
+
+There's a separate set of substitutions which can be applied to a single
+(declarative) statement. For example:
+
+"S." => "S." "Excuse me, but you said that S." "So I did."
+"S." => "S." "How, S?" "Yes."
+
+The answers to most questions are statements, and some statement templates
+can contain further Q/A pairs. So the whole system can recurse and become
+arbitrarily complex. We use a high probability of substitution on the base
+question, and a lower probability as the substitutions stack up -- this
+keeps the total size in a nice range.
+
+
+The Streamer object is a chunk of code which I've used in many projects.
+It takes a sequence of strings ("hello", "there") and outputs a sentence
+with correct punctuation, spacing, and capitalization ("Hello there.")
+This requires just one state variable, surprisingly.
+
+The Streamer also displays the opening and closing quotes for a line,
+and keeps track of who is speaking. (This requires some more state.)
+It's important to remember who's speaking so that a sentence ("I shall
+tell you...") can be quoted back as part of another sentence, from the
+other point of view ("You shall tell me...")
+
+Certain upper-case strings ("I", "YOU", "COMMA", etc) are understood as
+special tokens by the Streamer.
+
+Everything else in the script is a Question, a Statement, or a Sequence.
+
+"""
 
 import sys
 import random
