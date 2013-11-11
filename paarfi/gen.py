@@ -9,14 +9,17 @@ This code is not commented, but I will try to explain the model. It's
 simpler than it looks, really.
 
 The idea is to take a simple question-answer pair ("Is it safe?" "Yes.")
-and elaborate it into a complicated interchange.
+and elaborate it into a complicated interchange. An interchange is a set
+of lines, usually two to ten (but sometimes more), which answer that single
+question. (The entire novel is a sequence of 1200 interchanges.)
 
-This is done through a series of substitutions. We have a set of templates
-which can be substituted for an arbitrary Q-A pair. For example:
+The elaboration process is done through a series of substitutions. We have
+a set of templates which can be substituted for an arbitrary Q-A pair. For
+example:
 
-"Q?" "A." => "I have a question: Q?" "A."
-"Q?" "A." => "Q?" "I believe I can answer." "Do so, then." "A."
-"Q?" "A." => "Q?" "Shall I tell you now?" "Yes." "A."
+  Q? A. => "I have a question: Q?" "A."
+  Q? A. => "Q?" "I believe I can answer." "Do so, then." "A."
+  Q? A. => "Q?" "Shall I tell you now?" "Yes." "A."
 
 In some cases, the template itself contains a question-answer pair.
 (See the third example above.) This pair is subject to further
@@ -25,14 +28,37 @@ substitutions.
 There's a separate set of substitutions which can be applied to a single
 (declarative) statement. For example:
 
-"S." => "S." "Excuse me, but you said that S." "So I did."
-"S." => "S." "How, S?" "Yes."
+  S. => "S." "Excuse me, but you said that S." "So I did."
+  S. => "S." "How, S?" "Yes."
 
 The answers to most questions are statements, and some statement templates
 can contain further Q/A pairs. So the whole system can recurse and become
 arbitrarily complex. We use a high probability of substitution on the base
 question, and a lower probability as the substitutions stack up -- this
 keeps the total size in a nice range.
+
+
+We construct the interchange as a tree. The obvious model would be for
+the core question ("Is it safe?" "Yes.") to be the root of the tree,
+with all the elaborations branching off of it. That's not what we do!
+Sorry.
+
+Instead, every elaboration of a node *replaces* that node, pushing it
+down (the old node becomes one of the new node's children). So the core
+question winds up as a leaf of the tree, perhaps among other leaves
+("Shall I tell you now?" "Yes.")
+
+Thus, whenever we add a new node to the tree, you'll see the idiom
+
+  self.subnode = NodeClass().elaborate()
+
+NodeClass() is the constructor, but we don't store the node itself.
+Instead, we immediately call the elaborate() method, which *might* return
+the node itself, *or* might build a subtree with the node pushed down as
+one of its leaves. This is the recursion that constructs the entire tree.
+
+Then we just call generate() on the root. This runs through the tree
+recursively, generating the output for the exchange.
 
 
 The Streamer object is a chunk of code which I've used in many projects.
@@ -48,9 +74,6 @@ other point of view ("You shall tell me...")
 
 Certain upper-case strings ("I", "YOU", "COMMA", etc) are understood as
 special tokens by the Streamer.
-
-Everything else in the script is a Question, a Statement, or a Sequence.
-
 """
 
 import sys
@@ -195,13 +218,15 @@ class Sequence:
     def __repr__(self):
         return '<%s hgt=%d>' % (self.__class__.__name__, self.height)
 
+
 def godeeper(height):
     if height == 0:
         return True
     if height <= 1:
         return (random.random() < 0.75)
     return (random.random() < 0.5)
-    
+
+
 class Question:
     def __init__(self, asker, height=0):
         self.asker = bool(asker)
